@@ -17,11 +17,11 @@ namespace InteropDotNet
             this.logic = logic;
         }
 
-        private readonly object syncLock = new object();        
+        private readonly object syncLock = new object();
         private readonly Dictionary<string, IntPtr> loadedAssemblies = new Dictionary<string, IntPtr>();
 
         public IntPtr LoadLibrary(string fileName, string platformName = null)
-        {            
+        {
             fileName = FixUpLibraryName(fileName);
             lock (syncLock)
             {
@@ -39,10 +39,10 @@ namespace InteropDotNet
                     if (dllHandle != IntPtr.Zero)
                         loadedAssemblies[fileName] = dllHandle;
                     else
-                        LibraryLoaderTrace.TraceError("Failed to find library \"{0}\" for platform {1}.", fileName, platformName);
+                        throw new DllNotFoundException(string.Format("Failed to find library \"{0}\" for platform {1}.", fileName, platformName));
                 }
+                return loadedAssemblies[fileName];
             }
-            return loadedAssemblies[fileName];
         }
 
         private IntPtr CheckExecutingAssemblyDomain(string fileName, string platformName)
