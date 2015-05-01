@@ -1,6 +1,6 @@
 # InteropDotNet #
 
-The library allows you work with native libraries. Standard approach with the `DllImport` attribute may be inconvenient if you want to build AnyCPU assembly with MS.NET/Mono support. The `InteropRuntimeImplementer` class can generate implementation of interface with target signatures of native methods.
+The library allows you to work with native libraries. Standard approach with the `DllImport` attribute may be inconvenient if you want to build AnyCPU assembly with MS.NET/Mono support. The `InteropRuntimeImplementer` class can generate implementation of interface with target signatures of native methods.
 
 For example, let's create a native library (`NativeLib`) with the function `int sum(int a, int b) { return a + b; }` and build it in four configuration (Windows/Unix, x86/x64):
 
@@ -53,3 +53,7 @@ In the program, we declared interface `INative` with signatures of the target na
 
 
 As a result, we received a single .NET cross-platform AnyCPU-program with calls of native methods because of the `LibraryLoader` class loaded handles for specific user environment.
+
+## NuGet
+
+You can install the library via NuGet: [https://www.nuget.org/packages/InteropDotNet/](https://www.nuget.org/packages/InteropDotNet/)
