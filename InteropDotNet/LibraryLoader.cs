@@ -34,7 +34,7 @@ namespace InteropDotNet
                     if (dllHandle == IntPtr.Zero)
                         dllHandle = CheckCurrentAppDomain(fileName, platformName);
                     if (dllHandle == IntPtr.Zero)
-                        dllHandle = CheckWorkingDirecotry(fileName, platformName);
+                        dllHandle = CheckWorkingDirectory(fileName, platformName);
 
                     if (dllHandle != IntPtr.Zero)
                         loadedAssemblies[fileName] = dllHandle;
@@ -47,19 +47,37 @@ namespace InteropDotNet
 
         private IntPtr CheckExecutingAssemblyDomain(string fileName, string platformName)
         {
-            var baseDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+            if (string.IsNullOrEmpty(assemblyLocation))
+            {
+                LibraryLoaderTrace.TraceInformation("Executing assembly location was empty");
+                return IntPtr.Zero;
+            }
+            var baseDirectory = Path.GetDirectoryName(assemblyLocation);
             return InternalLoadLibrary(baseDirectory, platformName, fileName);
         }
 
         private IntPtr CheckCurrentAppDomain(string fileName, string platformName)
         {
-            var baseDirectory = Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory);
+            var appBase = AppDomain.CurrentDomain.BaseDirectory;
+            if (string.IsNullOrEmpty(appBase))
+            {
+                LibraryLoaderTrace.TraceInformation("App domain current domain base was empty");
+                return IntPtr.Zero;
+            }
+            var baseDirectory = Path.GetFullPath(appBase);
             return InternalLoadLibrary(baseDirectory, platformName, fileName);
         }
 
-        private IntPtr CheckWorkingDirecotry(string fileName, string platformName)
+        private IntPtr CheckWorkingDirectory(string fileName, string platformName)
         {
-            var baseDirectory = Path.GetFullPath(Environment.CurrentDirectory);
+            var currentDirectory = Environment.CurrentDirectory;
+            if (string.IsNullOrEmpty(currentDirectory))
+            {
+                LibraryLoaderTrace.TraceInformation("Current directory was empty");
+                return IntPtr.Zero;
+            }
+            var baseDirectory = Path.GetFullPath(currentDirectory);
             return InternalLoadLibrary(baseDirectory, platformName, fileName);
         }
 
