@@ -45,36 +45,10 @@ namespace InteropDotNet
             }
         }
 
-        /// <summary>
-        /// This is a utility to override environments where the LoadLibrary resolution fails. This happens when an executing DLL is deleted (temp file) or a DLL is loaded from a stream.
-        /// </summary>
-        /// <param name="dllFile">The full path to the DLL file.</param>
-        /// <returns>A pointer to the loaded DLL or IntPtr.Zero if unable to load.</returns>
-        public IntPtr LoadLibrary(string dllFile)
-        {
-            if (!File.Exists(dllFile)) return IntPtr.Zero;
-
-            var di = Directory.GetParent(dllFile);
-            var fileName = FixUpLibraryName(Path.GetFileNameWithoutExtension(dllFile));
-
-            lock (syncLock)
-            {
-                if (!loadedAssemblies.ContainsKey(fileName))
-                {
-                    IntPtr dllHandle = InternalLoadLibrary(di.Parent.FullName, di.Name, fileName);
-                    if (dllHandle != IntPtr.Zero)
-                        loadedAssemblies[fileName] = dllHandle;
-                    else
-                        throw new DllNotFoundException(string.Format("Failed to load library \"{0}\" for platform {1} in {2}.", fileName, di.Name, di.Parent));
-                }
-                return loadedAssemblies[fileName];
-            }
-        }
-
         private IntPtr CheckExecutingAssemblyDomain(string fileName, string platformName)
         {
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-            if (null == assemblyLocation || "" == assemblyLocation)
+            if (string.IsNullOrEmpty(assemblyLocation))
             {
                 LibraryLoaderTrace.TraceInformation("Executing assembly location was empty");
                 return IntPtr.Zero;
@@ -86,7 +60,7 @@ namespace InteropDotNet
         private IntPtr CheckCurrentAppDomain(string fileName, string platformName)
         {
             var appBase = AppDomain.CurrentDomain.BaseDirectory;
-            if (null == appBase || "" == appBase)
+            if (string.IsNullOrEmpty(appBase))
             {
                 LibraryLoaderTrace.TraceInformation("App domain current domain base was empty");
                 return IntPtr.Zero;
@@ -98,7 +72,7 @@ namespace InteropDotNet
         private IntPtr CheckWorkingDirectory(string fileName, string platformName)
         {
             var currentDirectory = Environment.CurrentDirectory;
-            if (null == currentDirectory || "" == currentDirectory)
+            if (string.IsNullOrEmpty(currentDirectory))
             {
                 LibraryLoaderTrace.TraceInformation("Current directory was empty");
                 return IntPtr.Zero;
